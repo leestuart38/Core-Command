@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rogue Brain — AI Command Center</title>
+<title>Core Command — AI Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ── RESET & BASE ── */
@@ -706,7 +706,7 @@ textarea, input { font-family: inherit; }
 .chat-composer-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 0 8px 8px 10px;
   gap: 10px;
 }
@@ -792,7 +792,7 @@ textarea, input { font-family: inherit; }
         <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
       </div>
       <div>
-        <div class="setup-wordmark">Rogue Brain</div>
+        <div class="setup-wordmark">Core Command</div>
         <div class="setup-sub">AI Command Center</div>
       </div>
     </div>
@@ -814,11 +814,11 @@ textarea, input { font-family: inherit; }
     <div class="setup-field">
       <label class="setup-label" for="input-gist">Gist ID (optional)</label>
       <input class="setup-input" id="input-gist" type="text" placeholder="Leave blank to create a new Gist automatically">
-      <div class="setup-hint">If you already have a Rogue Brain Gist, paste its ID here. Otherwise leave blank.</div>
+      <div class="setup-hint">If you already have a Core Command Gist, paste its ID here. Otherwise leave blank.</div>
     </div>
 
     <div class="setup-error" id="setup-error"></div>
-    <button class="setup-btn" onclick="initSetup()">Launch Rogue Brain</button>
+    <button class="setup-btn" onclick="initSetup()">Launch Core Command</button>
   </div>
 </div>
 
@@ -831,14 +831,14 @@ textarea, input { font-family: inherit; }
         <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
       </div>
       <div>
-        <div class="brand-wordmark">Rogue Brain</div>
+        <div class="brand-wordmark">Core Command</div>
         <div class="brand-sub">AI Command Center</div>
       </div>
     </div>
     <div class="topbar-right">
       <div class="status-pill">
         <div class="status-dot"></div>
-        Brain active
+        Command active
       </div>
       <button class="topbar-btn" onclick="showView('brief')">Edit Brief</button>
       <button class="topbar-btn" onclick="clearKeys()" style="border-color:#2A2A2A">Reset Keys</button>
@@ -1043,7 +1043,7 @@ async function saveBrainToGist() {
   if(!GITHUB_TOKEN) return;
   const content = JSON.stringify(brain, null, 2);
   const body = {
-    description: 'Rogue Brain — Master Brief',
+    description: 'Core Command — Master Brief',
     public: false,
     files: { 'rogue-brain.json': { content } }
   };
@@ -1168,8 +1168,8 @@ function renderDashboard() {
 
   return `<div class="dashboard">
     <div class="dash-eyebrow">Rogue Lab AI Command Center</div>
-    <div class="dash-heading">Rogue Brain</div>
-    <div class="dash-sub">Five agents. One brain. Built to get Rogue to 8 figures.</div>
+    <div class="dash-heading">Core Command</div>
+    <div class="dash-sub">Five agents. One brief. Built to get Rogue to 8 figures.</div>
 
     <div class="brief-progress-row">
       <span class="progress-label">Brief</span>
@@ -1204,7 +1204,7 @@ function renderDashboard() {
     <div class="section-label" style="margin-top:24px">Master Brief</div>
     <div class="brief-snapshot">
       <div class="snapshot-header">
-        <div class="snapshot-title">Brain Context</div>
+        <div class="snapshot-title">Brief Context</div>
         <button class="snapshot-edit" onclick="showView('brief')">Edit brief →</button>
       </div>
       <div class="snapshot-grid">
@@ -1439,7 +1439,7 @@ function buildSystemPrompt(agentKey) {
     ops: `You are the Rogue Lab Operations Agent for Lee Stuart. Help optimize production, write SOPs, identify bottlenecks, and systematize operations. Equipment: ROQ auto presses, Mimaki TXF300-75 DTF printers, Tajima embroidery machines. Framework: Lean/3S/Kaizen. Be specific and actionable. Never use em dashes.`,
     marketing: `You are the Rogue Lab Marketing Agent for Lee Stuart. Channels: YouTube (126K+ subscribers), Instagram @leestuart38 (35K), @roguelabmfg (26K), Facebook group Rogue Printers (18K). Help with content strategy, captions, email campaigns, YouTube scripts, and campaign ideas. Voice is critical: raw, confident, human, peer-to-peer. Never sound like AI. Never use em dashes.`,
     finance: `You are the Rogue Lab Finance Agent for Lee Stuart. Help with pricing strategy, margin analysis, job costing, and financial modeling for Rogue Lab, Rogue Transfers, and Rogue Academy. Think in unit economics and recurring vs one-time revenue. Be precise and direct. Never use em dashes.`,
-    strategy: `You are the Rogue Brain Strategic Advisor for Lee Stuart — think like an entrepreneurial co-founder who's been in the room. You know all three businesses and the 8-figure goal. Help with strategic decisions, prioritization, growth levers, and hard calls. Be direct, challenge assumptions when needed, and don't soften hard truths. Never use em dashes.`
+    strategy: `You are the Core Command Strategic Advisor for Lee Stuart — think like an entrepreneurial co-founder who's been in the room. You know all three businesses and the 8-figure goal. Help with strategic decisions, prioritization, growth levers, and hard calls. Be direct, challenge assumptions when needed, and don't soften hard truths. Never use em dashes.`
   };
 
   return `${prompts[agentKey]}
