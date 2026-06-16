@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rogue Brain — AI Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0D0D0D;
+  color: #F0F0F0;
+  -webkit-font-smoothing: antialiased;
+}
+button { cursor: pointer; font-family: inherit; }
+textarea, input { font-family: inherit; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
+
+/* ── SETUP SCREEN ── */
+#setup-screen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0D0D0D;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+#setup-screen.visible { display: flex; }
+.setup-box {
+  width: 480px;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  padding: 40px;
+}
+.setup-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.setup-mark {
+  width: 36px;
+  height: 36px;
+  background: #CC0000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.setup-mark svg { width: 18px; height: 18px; fill: white; }
+.setup-wordmark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+  color: #F0F0F0;
+}
+.setup-sub {
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.setup-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.setup-desc {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.setup-field { margin-bottom: 16px; }
+.setup-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 6px;
+}
+.setup-input {
+  width: 100%;
+  background: #0D0D0D;
+  border: 1px solid #2A2A2A;
+  color: #F0F0F0;
+  padding: 10px 12px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.setup-input:focus { border-color: #CC0000; }
+.setup-hint {
+  font-size: 11px;
+  color: #555;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.setup-hint a { color: #CC0000; text-decoration: none; }
+.setup-hint a:hover { text-decoration: underline; }
+.setup-btn {
+  width: 100%;
+  background: #CC0000;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.setup-btn:hover { background: #AA0000; }
+.setup-error {
+  font-size: 11px;
+  color: #CC0000;
+  margin-top: 8px;
+  display: none;
+}
+
+/* ── APP SHELL ── */
+#app {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+}
+#app.visible { display: flex; }
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 52px;
+  background: #0D0D0D;
+  border-bottom: 1px solid #2A2A2A;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  flex-shrink: 0;
+  position: relative;
+}
+.topbar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #CC0000;
+  opacity: 0.6;
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  background: #CC0000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.brand-mark svg { width: 15px; height: 15px; fill: white; }
+.brand-wordmark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1.5px;
+  color: #F0F0F0;
+  line-height: 1;
+}
+.brand-sub {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #555;
+  margin-top: 1px;
+}
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #555;
+}
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: breathe 2.5s ease-in-out infinite;
+}
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.topbar-btn {
+  background: none;
+  border: 1px solid #2A2A2A;
+  color: #888;
+  padding: 5px 12px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.topbar-btn:hover { border-color: #444; color: #F0F0F0; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 200px;
+  background: #0D0D0D;
+  border-right: 1px solid #2A2A2A;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+.sidebar-section {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #444;
+  padding: 20px 16px 8px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  color: #666;
+  font-size: 12px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.1s;
+  position: relative;
+}
+.nav-item:hover { color: #F0F0F0; background: #161616; }
+.nav-item.active { color: #F0F0F0; background: #161616; }
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #CC0000;
+}
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.nav-active-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-left: auto;
+  opacity: 0;
+}
+.nav-item.active .nav-active-dot { opacity: 1; }
+.sidebar-divider {
+  height: 1px;
+  background: #1F1F1F;
+  margin: 8px 16px;
+}
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── DASHBOARD ── */
+.dashboard {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+.dash-eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #CC0000;
+  margin-bottom: 6px;
+}
+.dash-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 1px;
+  color: #F0F0F0;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.dash-sub {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 28px;
+}
+.brief-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.progress-label { font-size: 10px; color: #555; letter-spacing: 0.5px; text-transform: uppercase; }
+.progress-track {
+  flex: 1;
+  max-width: 200px;
+  height: 2px;
+  background: #1F1F1F;
+}
+.progress-fill {
+  height: 100%;
+  background: #CC0000;
+  transition: width 0.5s ease;
+}
+.progress-pct { font-size: 10px; color: #555; }
+
+.section-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #444;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1F1F1F;
+}
+
+/* ── AGENT CARDS ── */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: #1F1F1F;
+  margin-bottom: 28px;
+}
+.agent-card {
+  background: #0D0D0D;
+  padding: 20px;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+  border: none;
+  text-align: left;
+  color: #F0F0F0;
+}
+.agent-card:hover { background: #161616; }
+.agent-card.featured {
+  grid-column: 1 / -1;
+  background: #111;
+}
+.agent-card.featured:hover { background: #161616; }
+.agent-card.featured::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #CC0000;
+}
+.ac-tag {
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #CC0000;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ac-tag::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #CC0000;
+  opacity: 0.3;
+  max-width: 40px;
+}
+.ac-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #F0F0F0;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.agent-card.featured .ac-name { font-size: 28px; }
+.ac-desc {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.agent-card.featured .ac-desc { max-width: 480px; }
+.ac-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.capability-tag {
+  font-size: 10px;
+  color: #555;
+  border: 1px solid #2A2A2A;
+  padding: 3px 8px;
+  letter-spacing: 0.3px;
+}
+.ac-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #CC0000;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  transition: gap 0.15s;
+}
+.ac-open:hover { gap: 10px; }
+.ac-arrow { font-size: 12px; }
+
+/* ── BRIEF SNAPSHOT ── */
+.brief-snapshot {
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  padding: 20px;
+}
+.snapshot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.snapshot-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: #F0F0F0;
+}
+.snapshot-edit {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #555;
+  background: none;
+  border: none;
+  transition: color 0.1s;
+}
+.snapshot-edit:hover { color: #CC0000; }
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 24px;
+}
+.snapshot-row { display: flex; flex-direction: column; gap: 3px; }
+.snapshot-key {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #444;
+}
+.snapshot-val { font-size: 12px; color: #888; line-height: 1.4; }
+.snapshot-val.empty { color: #333; font-style: italic; }
+
+/* ── MASTER BRIEF ── */
+.brief-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+}
+.brief-header { margin-bottom: 28px; }
+.brief-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.brief-sub { font-size: 12px; color: #555; }
+.brief-sections { display: flex; flex-direction: column; gap: 1px; background: #1F1F1F; }
+.brief-section {
+  background: #0D0D0D;
+  padding: 20px 24px;
+}
+.brief-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.brief-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: #F0F0F0;
+}
+.brief-fields { display: flex; flex-direction: column; gap: 14px; }
+.brief-field-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #555;
+  margin-bottom: 5px;
+}
+.brief-textarea {
+  width: 100%;
+  background: #0A0A0A;
+  border: 1px solid #222;
+  color: #D0D0D0;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 68px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.brief-textarea:focus { border-color: #CC0000; }
+.brief-input {
+  width: 100%;
+  background: #0A0A0A;
+  border: 1px solid #222;
+  color: #D0D0D0;
+  padding: 9px 12px;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.brief-input:focus { border-color: #CC0000; }
+.brief-footer {
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #0D0D0D;
+  border-top: 1px solid #1F1F1F;
+  flex-shrink: 0;
+}
+.save-btn {
+  background: #CC0000;
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+.save-btn:hover { background: #AA0000; }
+.save-status {
+  font-size: 11px;
+  color: #555;
+}
+
+/* ── AGENT VIEW ── */
+.agent-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.agent-view-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #1F1F1F;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #0D0D0D;
+  flex-shrink: 0;
+}
+.back-btn {
+  background: none;
+  border: 1px solid #2A2A2A;
+  color: #666;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: all 0.1s;
+}
+.back-btn:hover { border-color: #444; color: #F0F0F0; }
+.agent-view-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+}
+.agent-view-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.agent-view-desc { font-size: 11px; color: #555; margin-top: 2px; }
+
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.msg { display: flex; flex-direction: column; max-width: 80%; }
+.msg.user { align-self: flex-end; }
+.msg.ai { align-self: flex-start; }
+.msg-bubble {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.msg.user .msg-bubble {
+  background: #CC0000;
+  color: white;
+}
+.msg.ai .msg-bubble {
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  color: #D0D0D0;
+}
+
+.starters-row {
+  padding: 0 24px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.starter-btn {
+  font-size: 11px;
+  color: #666;
+  border: 1px solid #2A2A2A;
+  padding: 5px 12px;
+  background: none;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+.starter-btn:hover { border-color: #CC0000; color: #CC0000; }
+
+.chat-input-row {
+  padding: 12px 24px 16px;
+  border-top: 1px solid #1F1F1F;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.chat-textarea {
+  flex: 1;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  color: #F0F0F0;
+  padding: 10px 14px;
+  font-size: 13px;
+  resize: none;
+  min-height: 40px;
+  max-height: 120px;
+  outline: none;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.chat-textarea:focus { border-color: #CC0000; }
+.send-btn {
+  width: 40px;
+  height: 40px;
+  background: #CC0000;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.send-btn:hover { background: #AA0000; }
+.send-btn svg { width: 14px; height: 14px; fill: white; }
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  width: fit-content;
+}
+.typing-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #555;
+  animation: tdot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes tdot { 0%,80%,100%{opacity:0.2;transform:scale(0.9)} 40%{opacity:1;transform:scale(1)} }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  border-left: 2px solid #CC0000;
+  padding: 12px 16px;
+  font-size: 12px;
+  color: #D0D0D0;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.2s;
+  pointer-events: none;
+  z-index: 200;
+}
+.toast.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── SETUP SCREEN ── -->
+<div id="setup-screen">
+  <div class="setup-box">
+    <div class="setup-logo">
+      <div class="setup-mark">
+        <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
+      </div>
+      <div>
+        <div class="setup-wordmark">Rogue Brain</div>
+        <div class="setup-sub">AI Command Center</div>
+      </div>
+    </div>
+    <div class="setup-title">First-time setup</div>
+    <div class="setup-desc">Enter your API keys to get started. These are stored locally in your browser and never sent anywhere except the APIs they authenticate.</div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="input-anthropic">Anthropic API Key</label>
+      <input class="setup-input" id="input-anthropic" type="password" placeholder="sk-ant-...">
+      <div class="setup-hint">Get yours at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> — under API Keys.</div>
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="input-github">GitHub Personal Access Token</label>
+      <input class="setup-input" id="input-github" type="password" placeholder="ghp_...">
+      <div class="setup-hint">Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → Generate new token (classic) → check <strong>gist</strong> scope only.</div>
+    </div>
+
+    <div class="setup-field">
+      <label class="setup-label" for="input-gist">Gist ID (optional)</label>
+      <input class="setup-input" id="input-gist" type="text" placeholder="Leave blank to create a new Gist automatically">
+      <div class="setup-hint">If you already have a Rogue Brain Gist, paste its ID here. Otherwise leave blank.</div>
+    </div>
+
+    <div class="setup-error" id="setup-error"></div>
+    <button class="setup-btn" onclick="initSetup()">Launch Rogue Brain</button>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="brand-mark">
+        <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
+      </div>
+      <div>
+        <div class="brand-wordmark">Rogue Brain</div>
+        <div class="brand-sub">AI Command Center</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        Brain active
+      </div>
+      <button class="topbar-btn" onclick="showView('brief')">Edit Brief</button>
+      <button class="topbar-btn" onclick="clearKeys()" style="border-color:#2A2A2A">Reset Keys</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">Views</div>
+      <button class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
+        <span class="nav-icon">⊞</span>
+        Dashboard
+      </button>
+      <button class="nav-item" id="nav-brief" onclick="showView('brief')">
+        <span class="nav-icon">◈</span>
+        Master Brief
+      </button>
+
+      <div class="sidebar-section" style="margin-top:4px">Agents</div>
+      <button class="nav-item" id="nav-sales" onclick="showAgent('sales')">
+        <span class="nav-icon">💰</span>
+        Sales
+        <span class="nav-active-dot"></span>
+      </button>
+      <button class="nav-item" id="nav-ops" onclick="showAgent('ops')">
+        <span class="nav-icon">⚙️</span>
+        Operations
+        <span class="nav-active-dot"></span>
+      </button>
+      <button class="nav-item" id="nav-marketing" onclick="showAgent('marketing')">
+        <span class="nav-icon">📣</span>
+        Marketing
+        <span class="nav-active-dot"></span>
+      </button>
+      <button class="nav-item" id="nav-finance" onclick="showAgent('finance')">
+        <span class="nav-icon">📊</span>
+        Finance
+        <span class="nav-active-dot"></span>
+      </button>
+      <button class="nav-item" id="nav-strategy" onclick="showAgent('strategy')">
+        <span class="nav-icon">🎯</span>
+        Big Picture
+        <span class="nav-active-dot"></span>
+      </button>
+
+      <div style="margin-top:auto;padding:16px;border-top:1px solid #1F1F1F">
+        <div style="font-size:9px;color:#333;letter-spacing:0.5px;line-height:1.6">
+          ROGUE LAB<br>
+          ROGUE TRANSFERS<br>
+          ROGUE ACADEMY
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main" id="main-content"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ── //
+let ANTHROPIC_KEY = '';
+let GITHUB_TOKEN = '';
+let GIST_ID = '';
+let currentView = 'dashboard';
+let currentAgent = 'sales';
+let isLoading = false;
+let currentModel = 'claude-sonnet-4-6';
+
+const DEFAULT_BRAIN = {
+  businesses: `Rogue Lab: screen printing & embroidery shop, Winnipeg, Canada. High-end production with ROQ auto presses, Tajima embroidery machines. B2B and direct retail.\n\nRogue Transfers: B2B/B2C DTF transfers, stickers, patches. Mimaki TXF300-75 DTF printers. Ships across Canada.\n\nRogue Academy: Kajabi-based coaching and education platform for the decorated apparel industry.`,
+  idealCustomer: `Branded merch buyers, local businesses, sports organizations, tattoo shops, breweries, first responder and military apparel brands. Rogue Transfers targets other print shops and decorators who need DTF gang sheets.`,
+  pricing: `Screen printing: volume-based tiered pricing. DTF transfers: priced per square inch and gang sheet size. Embroidery: per 1000 stitch count. Premium positioning — not the cheapest option, competing on quality, turnaround, and service.`,
+  goals: `Scale Rogue Lab and Rogue Transfers to 8-figure combined revenue. Systemize operations to reduce owner dependency. Grow Rogue Academy to a significant recurring revenue stream. Build Obsidian (custom print management software) to replace current stack long-term.`,
+  competitors: `Local Winnipeg print shops (budget positioning). National DTF suppliers (slower turnaround, less personal). Online merch fulfillment platforms (lower quality, no customization).`,
+  voice: `Blunt, direct, confident. No corporate fluff. Industry peer talking to another industry peer. Raw and human — never sounds like AI-generated marketing copy. Occasional profanity is fine. No em dashes.`,
+  currentStack: `YoPrint (order management), Kajabi (Rogue Academy), Omnisend (email marketing), Monday.com (project management). Building Obsidian to replace YoPrint long-term.`,
+  revenue: ``,
+  salesProcess: ``,
+  objections: ``
+};
+
+let brain = { ...DEFAULT_BRAIN };
+
+const AGENT_CONFIG = {
+  sales: {
+    name: 'Sales Agent',
+    icon: '💰',
+    desc: 'Quotes, follow-up, pipeline, closing',
+    capabilities: ['Quote follow-up', 'Cold outreach', 'Objection handling', 'Upsell angles', 'Pipeline thinking'],
+    starters: [
+      'Write a follow-up for a quote gone cold',
+      'Help me upsell on a screen print order',
+      'Draft outreach to a new brewery client',
+      'How do I handle a price objection?'
+    ],
+    history: [],
+    greeting: `Sales Agent online. I know your businesses, your pricing posture, and who you're selling to.\n\nGive me a deal, a cold quote, or a lead you're trying to close.`
+  },
+  ops: {
+    name: 'Operations Agent',
+    icon: '⚙️',
+    desc: 'SOPs, production flow, lean systems',
+    capabilities: ['SOP writing', 'Production mapping', 'KPI setup', 'QC checklists', 'Lean/Kaizen'],
+    starters: [
+      'Write an SOP for DTF order intake',
+      'Map the screen print production flow',
+      'What KPIs should I track on the press floor?',
+      'Build a QC checklist for embroidery'
+    ],
+    history: [],
+    greeting: `Operations Agent online. I know your equipment, your Lean framework, and your production setup.\n\nWhat do you need to tighten up?`
+  },
+  marketing: {
+    name: 'Marketing Agent',
+    icon: '📣',
+    desc: 'Content, campaigns, brand voice',
+    capabilities: ['Instagram captions', 'YouTube scripts', 'Email campaigns', 'Content planning', 'Brand voice'],
+    starters: [
+      'Write an Instagram caption for a production video',
+      'Plan a YouTube video: DTF vs screen print',
+      'Draft an Omnisend campaign for Rogue Transfers',
+      'Give me 5 content ideas for this week'
+    ],
+    history: [],
+    greeting: `Marketing Agent online. I know your channels, your audience, and your voice.\n\nWhat are we making?`
+  },
+  finance: {
+    name: 'Finance Agent',
+    icon: '📊',
+    desc: 'Pricing, margins, revenue modeling',
+    capabilities: ['Job costing', 'Margin analysis', 'Pricing strategy', 'Revenue modeling', 'Unit economics'],
+    starters: [
+      'Help me price a 500-piece screen print job',
+      'What margins should I target on DTF transfers?',
+      'Break down the Rogue Academy revenue model',
+      'How do I think about pricing for 8-figure scale?'
+    ],
+    history: [],
+    greeting: `Finance Agent online. Let's get into the numbers.\n\nWhat do you need to figure out?`
+  },
+  strategy: {
+    name: 'Big Picture Agent',
+    icon: '🎯',
+    desc: 'Vision, decisions, 8-figure roadmap',
+    capabilities: ['Strategic priorities', 'Growth levers', 'Build vs buy decisions', 'Roadmap thinking', 'Hard questions'],
+    starters: [
+      'What should I focus on to move the needle most?',
+      'Is building Obsidian a distraction or a moat?',
+      'How do I scale Rogue Transfers nationally?',
+      'What does the path to 8 figures actually look like?'
+    ],
+    history: [],
+    greeting: `Big Picture Agent online. I know where you're trying to go.\n\nWhat decision are you sitting on?`
+  }
+};
+
+// ── STORAGE ── //
+function getKeys() {
+  return {
+    anthropic: localStorage.getItem('rb_anthropic') || '',
+    github: localStorage.getItem('rb_github') || '',
+    gist: localStorage.getItem('rb_gist') || ''
+  };
+}
+
+function saveKeys(anthropic, github, gist) {
+  localStorage.setItem('rb_anthropic', anthropic);
+  localStorage.setItem('rb_github', github);
+  localStorage.setItem('rb_gist', gist);
+}
+
+function clearKeys() {
+  if(!confirm('This clears your API keys and will require setup again. Continue?')) return;
+  localStorage.removeItem('rb_anthropic');
+  localStorage.removeItem('rb_github');
+  localStorage.removeItem('rb_gist');
+  location.reload();
+}
+
+async function loadBrainFromGist() {
+  if(!GIST_ID || !GITHUB_TOKEN) return;
+  try {
+    const resp = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if(!resp.ok) return;
+    const data = await resp.json();
+    const file = data.files['rogue-brain.json'];
+    if(file && file.content) {
+      const saved = JSON.parse(file.content);
+      brain = { ...DEFAULT_BRAIN, ...saved };
+    }
+  } catch(e) { console.error('Gist load error:', e); }
+}
+
+async function saveBrainToGist() {
+  if(!GITHUB_TOKEN) return;
+  const content = JSON.stringify(brain, null, 2);
+  const body = {
+    description: 'Rogue Brain — Master Brief',
+    public: false,
+    files: { 'rogue-brain.json': { content } }
+  };
+
+  try {
+    let resp, data;
+    if(GIST_ID) {
+      resp = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+    } else {
+      resp = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+    }
+    data = await resp.json();
+    if(data.id && !GIST_ID) {
+      GIST_ID = data.id;
+      localStorage.setItem('rb_gist', GIST_ID);
+    }
+    return true;
+  } catch(e) {
+    console.error('Gist save error:', e);
+    return false;
+  }
+}
+
+// ── INIT ── //
+async function initSetup() {
+  const anthropic = document.getElementById('input-anthropic').value.trim();
+  const github = document.getElementById('input-github').value.trim();
+  const gist = document.getElementById('input-gist').value.trim();
+  const errEl = document.getElementById('setup-error');
+
+  if(!anthropic) { errEl.textContent = 'Anthropic API key is required.'; errEl.style.display = 'block'; return; }
+  if(!github) { errEl.textContent = 'GitHub token is required for cross-device sync.'; errEl.style.display = 'block'; return; }
+
+  errEl.style.display = 'none';
+  ANTHROPIC_KEY = anthropic;
+  GITHUB_TOKEN = github;
+  GIST_ID = gist;
+  saveKeys(anthropic, github, gist);
+  await loadBrainFromGist();
+  launchApp();
+}
+
+async function boot() {
+  const keys = getKeys();
+  if(keys.anthropic && keys.github) {
+    ANTHROPIC_KEY = keys.anthropic;
+    GITHUB_TOKEN = keys.github;
+    GIST_ID = keys.gist;
+    await loadBrainFromGist();
+    launchApp();
+  } else {
+    document.getElementById('setup-screen').classList.add('visible');
+  }
+}
+
+function launchApp() {
+  document.getElementById('setup-screen').classList.remove('visible');
+  document.getElementById('app').classList.add('visible');
+  // Seed agent greetings
+  Object.keys(AGENT_CONFIG).forEach(key => {
+    if(AGENT_CONFIG[key].history.length === 0) {
+      AGENT_CONFIG[key].history = [{ role: 'ai', text: AGENT_CONFIG[key].greeting }];
+    }
+  });
+  showView('dashboard');
+}
+
+// ── NAVIGATION ── //
+function showView(view) {
+  currentView = view;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const navId = view === 'dashboard' ? 'nav-dashboard' : 'nav-brief';
+  const el = document.getElementById(navId);
+  if(el) el.classList.add('active');
+  render();
+}
+
+function showAgent(agentKey) {
+  currentAgent = agentKey;
+  currentView = 'agent';
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('nav-' + agentKey);
+  if(el) el.classList.add('active');
+  render();
+}
+
+// ── RENDER ── //
+function render() {
+  const main = document.getElementById('main-content');
+  if(currentView === 'dashboard') main.innerHTML = renderDashboard();
+  else if(currentView === 'brief') { main.innerHTML = renderBrief(); }
+  else if(currentView === 'agent') main.innerHTML = renderAgent(currentAgent);
+}
+
+function briefCompleteness() {
+  const fields = [brain.businesses, brain.idealCustomer, brain.pricing, brain.goals, brain.revenue, brain.salesProcess, brain.objections];
+  const filled = fields.filter(v => v && v.trim().length > 0).length;
+  return Math.round((filled / fields.length) * 100);
+}
+
+function renderDashboard() {
+  const pct = briefCompleteness();
+  const agents = Object.entries(AGENT_CONFIG);
+  const featured = agents[0];
+  const rest = agents.slice(1);
+
+  return `<div class="dashboard">
+    <div class="dash-eyebrow">Rogue Lab AI Command Center</div>
+    <div class="dash-heading">Rogue Brain</div>
+    <div class="dash-sub">Five agents. One brain. Built to get Rogue to 8 figures.</div>
+
+    <div class="brief-progress-row">
+      <span class="progress-label">Brief</span>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span class="progress-pct">${pct}% loaded</span>
+      ${pct < 60 ? '<button onclick="showView(\'brief\')" style="font-size:10px;color:#CC0000;background:none;border:none;letter-spacing:0.5px;text-transform:uppercase;margin-left:4px">Fill it in →</button>' : ''}
+    </div>
+
+    <div class="section-label">Agents</div>
+    <div class="agents-grid">
+      <div class="agent-card featured" onclick="showAgent('${featured[0]}')">
+        <div class="ac-tag">Active · Sales</div>
+        <div class="ac-name">${featured[1].name}</div>
+        <div class="ac-desc">Write follow-ups that don't sound like CRM templates. Get quote structures, outreach drafts, objection handling, and upsell angles — all in Rogue's voice.</div>
+        <div class="ac-capabilities">
+          ${featured[1].capabilities.map(c => `<span class="capability-tag">${c}</span>`).join('')}
+        </div>
+        <button class="ac-open" onclick="showAgent('${featured[0]}')">Open agent <span class="ac-arrow">→</span></button>
+      </div>
+      ${rest.map(([key, a]) => `
+      <div class="agent-card" onclick="showAgent('${key}')">
+        <div class="ac-tag">${a.icon} ${a.name.replace(' Agent','')}</div>
+        <div class="ac-name">${a.name}</div>
+        <div class="ac-desc">${a.desc}</div>
+        <div class="ac-capabilities">
+          ${a.capabilities.slice(0,3).map(c => `<span class="capability-tag">${c}</span>`).join('')}
+        </div>
+        <button class="ac-open">Open <span class="ac-arrow">→</span></button>
+      </div>`).join('')}
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Master Brief</div>
+    <div class="brief-snapshot">
+      <div class="snapshot-header">
+        <div class="snapshot-title">Brain Context</div>
+        <button class="snapshot-edit" onclick="showView('brief')">Edit brief →</button>
+      </div>
+      <div class="snapshot-grid">
+        <div class="snapshot-row">
+          <span class="snapshot-key">Businesses</span>
+          <span class="snapshot-val">Rogue Lab, Rogue Transfers, Rogue Academy</span>
+        </div>
+        <div class="snapshot-row">
+          <span class="snapshot-key">Target</span>
+          <span class="snapshot-val">8-figure revenue portfolio</span>
+        </div>
+        <div class="snapshot-row">
+          <span class="snapshot-key">Current revenue</span>
+          <span class="snapshot-val ${brain.revenue.trim() ? '' : 'empty'}">${brain.revenue.trim() || 'Not set'}</span>
+        </div>
+        <div class="snapshot-row">
+          <span class="snapshot-key">Sales process</span>
+          <span class="snapshot-val ${brain.salesProcess.trim() ? '' : 'empty'}">${brain.salesProcess.trim() ? brain.salesProcess.substring(0,80) + '…' : 'Not set'}</span>
+        </div>
+        <div class="snapshot-row">
+          <span class="snapshot-key">Tech stack</span>
+          <span class="snapshot-val">YoPrint, Kajabi, Omnisend, Monday.com</span>
+        </div>
+        <div class="snapshot-row">
+          <span class="snapshot-key">Gist ID</span>
+          <span class="snapshot-val" style="font-size:10px;word-break:break-all">${GIST_ID ? GIST_ID : '<span class="empty">Will create on first save</span>'}</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBrief() {
+  return `<div style="display:flex;flex-direction:column;height:100%;overflow:hidden">
+  <div class="brief-view" id="brief-scroll">
+    <div class="brief-header">
+      <div class="brief-heading">Master Brief</div>
+      <div class="brief-sub">Every agent reads this. The more context you give, the sharper the output.</div>
+    </div>
+
+    <div class="brief-sections">
+      <div class="brief-section">
+        <div class="brief-section-header">
+          <div class="brief-section-title">The Businesses</div>
+        </div>
+        <div class="brief-fields">
+          <div>
+            <div class="brief-field-label">Business overview</div>
+            <textarea class="brief-textarea" id="f-businesses" style="min-height:100px">${brain.businesses}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Current revenue (optional — helps agents calibrate)</div>
+            <input class="brief-input" id="f-revenue" placeholder="e.g. $800K combined, growing 40% YoY" value="${brain.revenue}">
+          </div>
+        </div>
+      </div>
+
+      <div class="brief-section">
+        <div class="brief-section-header">
+          <div class="brief-section-title">Sales &amp; Customers</div>
+        </div>
+        <div class="brief-fields">
+          <div>
+            <div class="brief-field-label">Ideal customer profile</div>
+            <textarea class="brief-textarea" id="f-ica">${brain.idealCustomer}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Pricing approach</div>
+            <textarea class="brief-textarea" id="f-pricing">${brain.pricing}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Current sales process</div>
+            <textarea class="brief-textarea" id="f-salesprocess" placeholder="How does a lead become an order? Where do deals die? What does follow-up look like?">${brain.salesProcess}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Common objections you hear</div>
+            <textarea class="brief-textarea" id="f-objections" placeholder="Price too high, minimums, turnaround time, etc.">${brain.objections}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="brief-section">
+        <div class="brief-section-header">
+          <div class="brief-section-title">Goals &amp; Competitors</div>
+        </div>
+        <div class="brief-fields">
+          <div>
+            <div class="brief-field-label">The goal</div>
+            <textarea class="brief-textarea" id="f-goals">${brain.goals}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Competitors</div>
+            <textarea class="brief-textarea" id="f-competitors">${brain.competitors}</textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="brief-section">
+        <div class="brief-section-header">
+          <div class="brief-section-title">Voice &amp; Stack</div>
+        </div>
+        <div class="brief-fields">
+          <div>
+            <div class="brief-field-label">Brand voice</div>
+            <textarea class="brief-textarea" id="f-voice">${brain.voice}</textarea>
+          </div>
+          <div>
+            <div class="brief-field-label">Current tech stack</div>
+            <textarea class="brief-textarea" id="f-stack">${brain.currentStack}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="brief-footer">
+    <button class="save-btn" onclick="saveBrief()">Save &amp; Sync to GitHub</button>
+    <span class="save-status" id="save-status">Syncs to your private Gist — available on any device.</span>
+  </div>
+  </div>`;
+}
+
+async function saveBrief() {
+  brain.businesses = document.getElementById('f-businesses').value;
+  brain.revenue = document.getElementById('f-revenue').value;
+  brain.idealCustomer = document.getElementById('f-ica').value;
+  brain.pricing = document.getElementById('f-pricing').value;
+  brain.salesProcess = document.getElementById('f-salesprocess').value;
+  brain.objections = document.getElementById('f-objections').value;
+  brain.goals = document.getElementById('f-goals').value;
+  brain.competitors = document.getElementById('f-competitors').value;
+  brain.voice = document.getElementById('f-voice').value;
+  brain.currentStack = document.getElementById('f-stack').value;
+
+  const statusEl = document.getElementById('save-status');
+  const saveBtn = document.querySelector('.save-btn');
+  statusEl.textContent = 'Saving to GitHub Gist...';
+  saveBtn.disabled = true;
+
+  const ok = await saveBrainToGist();
+  if(ok) {
+    statusEl.textContent = `Saved. Gist ID: ${GIST_ID}`;
+    saveBtn.textContent = 'Save & Sync to GitHub';
+    saveBtn.disabled = false;
+    toast('Brief saved and synced to GitHub.');
+  } else {
+    statusEl.textContent = 'Save failed — check your GitHub token.';
+    saveBtn.disabled = false;
+  }
+}
+
+function renderAgent(agentKey) {
+  const a = AGENT_CONFIG[agentKey];
+  const showStarters = a.history.length <= 1;
+
+  const html = `<div class="agent-view">
+    <div class="agent-view-header">
+      <button class="back-btn" onclick="showView('dashboard')" aria-label="Back">←</button>
+      <div class="agent-view-icon">${a.icon}</div>
+      <div>
+        <div class="agent-view-name">${a.name}</div>
+        <div class="agent-view-desc">${a.desc}</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:#444">Model</span>
+        <select id="model-selector" onchange="setModel(this.value)" style="background:#161616;border:1px solid #2A2A2A;color:#888;padding:5px 10px;font-size:11px;font-family:inherit;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
+          <option value="claude-haiku-4-5-20251001">Haiku — Fast</option>
+          <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — Balanced</option>
+          <option value="claude-opus-4-6">Opus 4.6 — Deep</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="chat-area" id="chat-area">
+      ${a.history.map(renderMsg).join('')}
+    </div>
+
+    ${showStarters ? `<div class="starters-row">
+      ${a.starters.map(s => `<button class="starter-btn" onclick="sendMsg(${JSON.stringify(s)})">${s}</button>`).join('')}
+    </div>` : ''}
+
+    <div class="chat-input-row">
+      <textarea class="chat-textarea" id="chat-input" placeholder="Message ${a.name}..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendFromInput()" aria-label="Send">
+        <svg viewBox="0 0 16 16"><path d="M14.5 8L2 2l2 6-2 6 12.5-6z"/></svg>
+      </button>
+    </div>
+  </div>`;
+
+  setTimeout(() => {
+    const sel = document.getElementById('model-selector');
+    if (sel) sel.value = currentModel;
+  }, 0);
+
+  return html;
+}
+
+function renderMsg(m) {
+  return `<div class="msg ${m.role === 'user' ? 'user' : 'ai'}">
+    <div class="msg-bubble">${escHtml(m.text)}</div>
+  </div>`;
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function handleKey(e) {
+  if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendFromInput(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function sendFromInput() {
+  const inp = document.getElementById('chat-input');
+  if(!inp || isLoading) return;
+  const val = inp.value.trim();
+  if(!val) return;
+  inp.value = '';
+  inp.style.height = 'auto';
+  sendMsg(val);
+}
+
+function buildSystemPrompt(agentKey) {
+  const a = AGENT_CONFIG[agentKey];
+  const prompts = {
+    sales: `You are the Rogue Lab Sales Agent — sharp, direct sales intelligence for Lee Stuart, founder of Rogue Lab and Rogue Transfers in Winnipeg.\n\nHelp with: quote follow-up emails and messages, quote structure for custom orders, upsell opportunities, outreach to new prospects, objection handling (price, timeline, quality), and pipeline prioritization.\n\nWrite in Rogue's voice — peer-to-peer, never salesy or corporate. Keep responses tight and immediately usable. Never use em dashes.`,
+    ops: `You are the Rogue Lab Operations Agent for Lee Stuart. Help optimize production, write SOPs, identify bottlenecks, and systematize operations. Equipment: ROQ auto presses, Mimaki TXF300-75 DTF printers, Tajima embroidery machines. Framework: Lean/3S/Kaizen. Be specific and actionable. Never use em dashes.`,
+    marketing: `You are the Rogue Lab Marketing Agent for Lee Stuart. Channels: YouTube (126K+ subscribers), Instagram @leestuart38 (35K), @roguelabmfg (26K), Facebook group Rogue Printers (18K). Help with content strategy, captions, email campaigns, YouTube scripts, and campaign ideas. Voice is critical: raw, confident, human, peer-to-peer. Never sound like AI. Never use em dashes.`,
+    finance: `You are the Rogue Lab Finance Agent for Lee Stuart. Help with pricing strategy, margin analysis, job costing, and financial modeling for Rogue Lab, Rogue Transfers, and Rogue Academy. Think in unit economics and recurring vs one-time revenue. Be precise and direct. Never use em dashes.`,
+    strategy: `You are the Rogue Brain Strategic Advisor for Lee Stuart — think like an entrepreneurial co-founder who's been in the room. You know all three businesses and the 8-figure goal. Help with strategic decisions, prioritization, growth levers, and hard calls. Be direct, challenge assumptions when needed, and don't soften hard truths. Never use em dashes.`
+  };
+
+  return `${prompts[agentKey]}
+
+BUSINESS CONTEXT:
+${brain.businesses}
+
+IDEAL CUSTOMER: ${brain.idealCustomer}
+
+PRICING: ${brain.pricing}
+
+SALES PROCESS: ${brain.salesProcess || 'Not specified yet.'}
+
+COMMON OBJECTIONS: ${brain.objections || 'Not specified yet.'}
+
+GOALS: ${brain.goals}
+
+COMPETITORS: ${brain.competitors}
+
+BRAND VOICE: ${brain.voice}
+
+TECH STACK: ${brain.currentStack}
+
+CURRENT REVENUE: ${brain.revenue || 'Not specified.'}`;
+}
+
+async function sendMsg(text) {
+  if(isLoading) return;
+  isLoading = true;
+
+  const a = AGENT_CONFIG[currentAgent];
+  a.history.push({ role: 'user', text });
+
+  const chatArea = document.getElementById('chat-area');
+  chatArea.innerHTML = a.history.map(renderMsg).join('');
+
+  const typingEl = document.createElement('div');
+  typingEl.className = 'msg ai';
+  typingEl.innerHTML = `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+  chatArea.appendChild(typingEl);
+  chatArea.scrollTop = chatArea.scrollHeight;
+
+  const messages = a.history.map(m => ({
+    role: m.role === 'user' ? 'user' : 'assistant',
+    content: m.text
+  }));
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: currentModel,
+        max_tokens: 1024,
+        system: buildSystemPrompt(currentAgent),
+        messages
+      })
+    });
+
+    const data = await resp.json();
+    if(data.error) throw new Error(data.error.message);
+    const reply = data.content?.filter(b => b.type === 'text').map(b => b.text).join('') || 'No response.';
+    a.history.push({ role: 'ai', text: reply });
+  } catch(e) {
+    a.history.push({ role: 'ai', text: `Error: ${e.message}. Check your Anthropic API key.` });
+  }
+
+  isLoading = false;
+  chatArea.innerHTML = a.history.map(renderMsg).join('');
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function setModel(val) {
+  currentModel = val;
+  const labels = {
+    'claude-haiku-4-5-20251001': 'Haiku',
+    'claude-sonnet-4-6': 'Sonnet 4.6',
+    'claude-opus-4-6': 'Opus 4.6'
+  };
+  toast('Switched to ' + labels[val]);
+}
+
+// ── TOAST ── //
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 3000);
+}
+
+// ── BOOT ── //
+boot();
+</script>
+</body>
+</html>
