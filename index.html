@@ -6,28 +6,47 @@
 <title>Core Command — AI Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ── ROGUE LAB BRAND TOKENS ── */
+:root {
+  --red: #CC0000;
+  --red-dim: #AA0000;
+  --red-glow: rgba(204, 0, 0, 0.12);
+  --ground: #0D0D0D;
+  --surface: #161616;
+  --raised: #1F1F1F;
+  --border: #2A2A2A;
+  --text: #F0F0F0;
+  --muted: #666;
+  --dim: #444;
+  --faint: #333;
+}
+
 /* ── RESET & BASE ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 body {
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 13px;
-  background: #0D0D0D;
-  color: #F0F0F0;
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 32px 32px;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 button { cursor: pointer; font-family: inherit; }
 textarea, input { font-family: inherit; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2A2A2A; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--border); }
 
 /* ── SETUP SCREEN ── */
 #setup-screen {
   display: none;
   position: fixed;
   inset: 0;
-  background: #0D0D0D;
+  background: var(--ground);
   z-index: 100;
   align-items: center;
   justify-content: center;
@@ -36,9 +55,19 @@ textarea, input { font-family: inherit; }
 #setup-screen.visible { display: flex; }
 .setup-box {
   width: 480px;
-  background: #161616;
-  border: 1px solid #2A2A2A;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 40px;
+  position: relative;
+}
+.setup-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--red);
 }
 .setup-logo {
   display: flex;
@@ -49,22 +78,30 @@ textarea, input { font-family: inherit; }
 .setup-mark {
   width: 36px;
   height: 36px;
-  background: #CC0000;
+  background: var(--red);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
-.setup-mark svg { width: 18px; height: 18px; fill: white; }
+.brand-letter {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: white;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.setup-mark .brand-letter { font-size: 24px; }
 .setup-wordmark {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 24px;
-  letter-spacing: 1px;
-  color: #F0F0F0;
+  font-size: 26px;
+  letter-spacing: 2px;
+  color: var(--text);
 }
 .setup-sub {
-  font-size: 11px;
-  color: #666;
-  letter-spacing: 0.5px;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
   text-transform: uppercase;
   margin-top: 2px;
 }
@@ -100,31 +137,31 @@ textarea, input { font-family: inherit; }
   outline: none;
   transition: border-color 0.15s;
 }
-.setup-input:focus { border-color: #CC0000; }
+.setup-input:focus { border-color: var(--red); }
 .setup-hint {
   font-size: 11px;
   color: #555;
   margin-top: 5px;
   line-height: 1.5;
 }
-.setup-hint a { color: #CC0000; text-decoration: none; }
+.setup-hint a { color: var(--red); text-decoration: none; }
 .setup-hint a:hover { text-decoration: underline; }
 .setup-btn {
   width: 100%;
-  background: #CC0000;
+  background: var(--red);
   color: white;
   border: none;
   padding: 12px;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   margin-top: 8px;
   transition: background 0.15s;
 }
-.setup-btn:hover { background: #AA0000; }
+.setup-btn:hover { background: var(--red-dim); }
 .setup-error {
   font-size: 11px;
-  color: #CC0000;
+  color: var(--red);
   margin-top: 8px;
   display: none;
 }
@@ -139,80 +176,80 @@ textarea, input { font-family: inherit; }
 
 /* ── TOPBAR ── */
 .topbar {
-  height: 52px;
-  background: #0D0D0D;
-  border-bottom: 1px solid #2A2A2A;
+  height: 56px;
+  background: var(--ground);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 24px;
   flex-shrink: 0;
   position: relative;
 }
 .topbar::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background: #CC0000;
-  opacity: 0.6;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red) 0%, var(--red) 180px, transparent 180px);
 }
 .topbar-left { display: flex; align-items: center; gap: 14px; }
 .brand-mark {
-  width: 30px;
-  height: 30px;
-  background: #CC0000;
+  width: 32px;
+  height: 32px;
+  background: var(--red);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.brand-mark svg { width: 15px; height: 15px; fill: white; }
 .brand-wordmark {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 1.5px;
-  color: #F0F0F0;
+  font-size: 22px;
+  letter-spacing: 2px;
+  color: var(--text);
   line-height: 1;
 }
 .brand-sub {
   font-size: 9px;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #555;
-  margin-top: 1px;
+  color: var(--muted);
+  margin-top: 2px;
 }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
 .status-pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 10px;
-  letter-spacing: 0.5px;
+  font-size: 9px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: #555;
+  color: var(--muted);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 .status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
+  width: 5px;
+  height: 5px;
+  background: var(--red);
   animation: breathe 2.5s ease-in-out infinite;
 }
-@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes breathe { 0%,100%{opacity:1} 50%{opacity:0.25} }
 .topbar-btn {
-  background: none;
-  border: 1px solid #2A2A2A;
-  color: #888;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
   padding: 5px 12px;
-  font-size: 10px;
-  letter-spacing: 0.5px;
+  font-size: 9px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   transition: all 0.15s;
 }
-.topbar-btn:hover { border-color: #444; color: #F0F0F0; }
+.topbar-btn:hover { border-color: var(--red); color: var(--text); }
 
 /* ── LAYOUT ── */
 .layout {
@@ -223,9 +260,9 @@ textarea, input { font-family: inherit; }
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 200px;
-  background: #0D0D0D;
-  border-right: 1px solid #2A2A2A;
+  width: 210px;
+  background: var(--ground);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -234,9 +271,9 @@ textarea, input { font-family: inherit; }
 .sidebar-section {
   font-size: 9px;
   font-weight: 500;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #444;
+  color: var(--dim);
   padding: 20px 16px 8px;
 }
 .nav-item {
@@ -244,7 +281,7 @@ textarea, input { font-family: inherit; }
   align-items: center;
   gap: 10px;
   padding: 9px 16px;
-  color: #666;
+  color: var(--muted);
   font-size: 12px;
   background: none;
   border: none;
@@ -253,16 +290,16 @@ textarea, input { font-family: inherit; }
   transition: all 0.1s;
   position: relative;
 }
-.nav-item:hover { color: #F0F0F0; background: #161616; }
-.nav-item.active { color: #F0F0F0; background: #161616; }
+.nav-item:hover { color: var(--text); background: var(--surface); }
+.nav-item.active { color: var(--text); background: var(--surface); }
 .nav-item.active::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: #CC0000;
+  width: 3px;
+  background: var(--red);
 }
 .nav-icon {
   width: 24px;
@@ -270,22 +307,64 @@ textarea, input { font-family: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 13px;
+  letter-spacing: 0;
   flex-shrink: 0;
+  background: var(--ground);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all 0.1s;
+}
+.nav-item:hover .nav-icon { border-color: #444; color: var(--text); }
+.nav-item.active .nav-icon {
+  background: var(--red);
+  border-color: var(--red);
+  color: white;
 }
 .nav-active-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #22c55e;
+  width: 4px;
+  height: 4px;
+  background: var(--red);
   margin-left: auto;
   opacity: 0;
 }
 .nav-item.active .nav-active-dot { opacity: 1; }
-.sidebar-divider {
-  height: 1px;
-  background: #1F1F1F;
-  margin: 8px 16px;
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px;
+  border-top: 1px solid var(--raised);
+  position: relative;
+}
+.sidebar-footer::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 16px;
+  width: 32px;
+  height: 2px;
+  background: var(--red);
+}
+.sidebar-footer-mark {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.sidebar-footer-list {
+  font-size: 9px;
+  color: var(--faint);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  line-height: 1.7;
+}
+.sidebar-footer-loc {
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  text-transform: uppercase;
 }
 
 /* ── MAIN ── */
@@ -304,23 +383,36 @@ textarea, input { font-family: inherit; }
 }
 .dash-eyebrow {
   font-size: 10px;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: #CC0000;
-  margin-bottom: 6px;
+  color: var(--red);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-eyebrow::after {
+  content: '';
+  flex: 1;
+  max-width: 48px;
+  height: 1px;
+  background: var(--red);
+  opacity: 0.4;
 }
 .dash-heading {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px;
-  letter-spacing: 1px;
-  color: #F0F0F0;
-  line-height: 1;
-  margin-bottom: 4px;
+  font-size: 48px;
+  letter-spacing: 2px;
+  color: var(--text);
+  line-height: 0.95;
+  margin-bottom: 6px;
 }
 .dash-sub {
   font-size: 12px;
-  color: #555;
-  margin-bottom: 28px;
+  color: var(--muted);
+  margin-bottom: 32px;
+  max-width: 420px;
+  line-height: 1.6;
 }
 .brief-progress-row {
   display: flex;
@@ -337,20 +429,30 @@ textarea, input { font-family: inherit; }
 }
 .progress-fill {
   height: 100%;
-  background: #CC0000;
+  background: var(--red);
   transition: width 0.5s ease;
 }
-.progress-pct { font-size: 10px; color: #555; }
+.progress-pct { font-size: 10px; color: var(--muted); }
 
 .section-label {
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #444;
+  color: var(--dim);
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #1F1F1F;
+  border-bottom: 1px solid var(--raised);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: var(--red);
+  flex-shrink: 0;
 }
 
 /* ── AGENT CARDS ── */
@@ -362,35 +464,41 @@ textarea, input { font-family: inherit; }
   margin-bottom: 28px;
 }
 .agent-card {
-  background: #0D0D0D;
+  background: var(--ground);
   padding: 20px;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: background 0.1s, box-shadow 0.1s;
   position: relative;
   border: none;
   text-align: left;
-  color: #F0F0F0;
+  color: var(--text);
 }
-.agent-card:hover { background: #161616; }
+.agent-card:hover {
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--red);
+}
 .agent-card.featured {
   grid-column: 1 / -1;
   background: #111;
 }
-.agent-card.featured:hover { background: #161616; }
+.agent-card.featured:hover {
+  background: var(--surface);
+  box-shadow: inset 0 3px 0 var(--red);
+}
 .agent-card.featured::after {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: #CC0000;
+  height: 3px;
+  background: var(--red);
 }
 .ac-tag {
   font-size: 9px;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
-  color: #CC0000;
+  color: var(--red);
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -440,7 +548,7 @@ textarea, input { font-family: inherit; }
   font-size: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: #CC0000;
+  color: var(--red);
   background: none;
   border: none;
   padding: 0;
@@ -452,9 +560,19 @@ textarea, input { font-family: inherit; }
 
 /* ── BRIEF SNAPSHOT ── */
 .brief-snapshot {
-  background: #161616;
-  border: 1px solid #2A2A2A;
+  background: var(--surface);
+  border: 1px solid var(--border);
   padding: 20px;
+  position: relative;
+}
+.brief-snapshot::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--red);
 }
 .snapshot-header {
   display: flex;
@@ -477,7 +595,7 @@ textarea, input { font-family: inherit; }
   border: none;
   transition: color 0.1s;
 }
-.snapshot-edit:hover { color: #CC0000; }
+.snapshot-edit:hover { color: var(--red); }
 .snapshot-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -502,8 +620,8 @@ textarea, input { font-family: inherit; }
 .brief-header { margin-bottom: 28px; }
 .brief-heading {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 36px;
-  letter-spacing: 1px;
+  font-size: 40px;
+  letter-spacing: 2px;
   margin-bottom: 4px;
 }
 .brief-sub { font-size: 12px; color: #555; }
@@ -546,7 +664,7 @@ textarea, input { font-family: inherit; }
   outline: none;
   transition: border-color 0.15s;
 }
-.brief-textarea:focus { border-color: #CC0000; }
+.brief-textarea:focus { border-color: var(--red); }
 .brief-input {
   width: 100%;
   background: #0A0A0A;
@@ -557,27 +675,27 @@ textarea, input { font-family: inherit; }
   outline: none;
   transition: border-color 0.15s;
 }
-.brief-input:focus { border-color: #CC0000; }
+.brief-input:focus { border-color: var(--red); }
 .brief-footer {
   padding: 20px 24px;
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #0D0D0D;
-  border-top: 1px solid #1F1F1F;
+  background: var(--ground);
+  border-top: 1px solid var(--raised);
   flex-shrink: 0;
 }
 .save-btn {
-  background: #CC0000;
+  background: var(--red);
   color: white;
   border: none;
   padding: 10px 28px;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   transition: background 0.15s;
 }
-.save-btn:hover { background: #AA0000; }
+.save-btn:hover { background: var(--red-dim); }
 .save-status {
   font-size: 11px;
   color: #555;
@@ -592,17 +710,27 @@ textarea, input { font-family: inherit; }
 }
 .agent-view-header {
   padding: 16px 24px;
-  border-bottom: 1px solid #1F1F1F;
+  border-bottom: 1px solid var(--raised);
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #0D0D0D;
+  background: var(--ground);
   flex-shrink: 0;
+  position: relative;
+}
+.agent-view-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  width: 40px;
+  height: 2px;
+  background: var(--red);
 }
 .back-btn {
   background: none;
-  border: 1px solid #2A2A2A;
-  color: #666;
+  border: 1px solid var(--border);
+  color: var(--muted);
   width: 28px;
   height: 28px;
   display: flex;
@@ -612,25 +740,28 @@ textarea, input { font-family: inherit; }
   flex-shrink: 0;
   transition: all 0.1s;
 }
-.back-btn:hover { border-color: #444; color: #F0F0F0; }
+.back-btn:hover { border-color: var(--red); color: var(--text); }
 .agent-view-icon {
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
+  letter-spacing: 0;
   flex-shrink: 0;
-  background: #161616;
-  border: 1px solid #2A2A2A;
+  background: var(--red);
+  border: 1px solid var(--red);
+  color: white;
 }
 .agent-view-name {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 20px;
-  letter-spacing: 1px;
+  font-size: 22px;
+  letter-spacing: 1.5px;
   line-height: 1;
 }
-.agent-view-desc { font-size: 11px; color: #555; margin-top: 2px; }
+.agent-view-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
 .chat-area {
   flex: 1;
@@ -650,12 +781,12 @@ textarea, input { font-family: inherit; }
   white-space: pre-wrap;
 }
 .msg.user .msg-bubble {
-  background: #CC0000;
+  background: var(--red);
   color: white;
 }
 .msg.ai .msg-bubble {
-  background: #161616;
-  border: 1px solid #2A2A2A;
+  background: var(--surface);
+  border: 1px solid var(--border);
   color: #D0D0D0;
 }
 
@@ -675,21 +806,21 @@ textarea, input { font-family: inherit; }
   transition: all 0.1s;
   white-space: nowrap;
 }
-.starter-btn:hover { border-color: #CC0000; color: #CC0000; }
+.starter-btn:hover { border-color: var(--red); color: var(--red); }
 
 .chat-composer-wrap {
   padding: 12px 24px 16px;
-  border-top: 1px solid #1F1F1F;
+  border-top: 1px solid var(--raised);
   flex-shrink: 0;
 }
 .chat-composer {
-  background: #161616;
-  border: 1px solid #2A2A2A;
+  background: var(--surface);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   transition: border-color 0.15s;
 }
-.chat-composer:focus-within { border-color: #444; }
+.chat-composer:focus-within { border-color: var(--red); box-shadow: 0 0 0 1px var(--red-glow); }
 .chat-textarea {
   width: 100%;
   background: transparent;
@@ -725,11 +856,11 @@ textarea, input { font-family: inherit; }
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
-.model-select:focus { border-color: #444; color: #AAA; }
+.model-select:focus { border-color: var(--red); color: #AAA; }
 .send-btn {
   width: 32px;
   height: 32px;
-  background: #CC0000;
+  background: var(--red);
   border: none;
   color: white;
   display: flex;
@@ -738,7 +869,7 @@ textarea, input { font-family: inherit; }
   flex-shrink: 0;
   transition: background 0.15s;
 }
-.send-btn:hover { background: #AA0000; }
+.send-btn:hover { background: var(--red-dim); }
 .send-btn svg { width: 14px; height: 14px; fill: white; }
 
 /* Typing indicator */
@@ -767,9 +898,9 @@ textarea, input { font-family: inherit; }
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: #161616;
-  border: 1px solid #2A2A2A;
-  border-left: 2px solid #CC0000;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
   padding: 12px 16px;
   font-size: 12px;
   color: #D0D0D0;
@@ -789,11 +920,11 @@ textarea, input { font-family: inherit; }
   <div class="setup-box">
     <div class="setup-logo">
       <div class="setup-mark">
-        <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
+        <span class="brand-letter">R</span>
       </div>
       <div>
         <div class="setup-wordmark">Core Command</div>
-        <div class="setup-sub">AI Command Center</div>
+        <div class="setup-sub">Rogue Lab · Winnipeg</div>
       </div>
     </div>
     <div class="setup-title">First-time setup</div>
@@ -828,11 +959,11 @@ textarea, input { font-family: inherit; }
   <div class="topbar">
     <div class="topbar-left">
       <div class="brand-mark">
-        <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5 3.5-1 6-4 6-7.5V4L8 1z"/></svg>
+        <span class="brand-letter">R</span>
       </div>
       <div>
         <div class="brand-wordmark">Core Command</div>
-        <div class="brand-sub">AI Command Center</div>
+        <div class="brand-sub">Rogue Lab · Winnipeg</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -850,47 +981,45 @@ textarea, input { font-family: inherit; }
     <div class="sidebar">
       <div class="sidebar-section">Views</div>
       <button class="nav-item active" id="nav-dashboard" onclick="showView('dashboard')">
-        <span class="nav-icon">⊞</span>
+        <span class="nav-icon">D</span>
         Dashboard
       </button>
       <button class="nav-item" id="nav-brief" onclick="showView('brief')">
-        <span class="nav-icon">◈</span>
+        <span class="nav-icon">B</span>
         Master Brief
       </button>
 
       <div class="sidebar-section" style="margin-top:4px">Agents</div>
       <button class="nav-item" id="nav-sales" onclick="showAgent('sales')">
-        <span class="nav-icon">💰</span>
+        <span class="nav-icon">S</span>
         Sales
         <span class="nav-active-dot"></span>
       </button>
       <button class="nav-item" id="nav-ops" onclick="showAgent('ops')">
-        <span class="nav-icon">⚙️</span>
+        <span class="nav-icon">O</span>
         Operations
         <span class="nav-active-dot"></span>
       </button>
       <button class="nav-item" id="nav-marketing" onclick="showAgent('marketing')">
-        <span class="nav-icon">📣</span>
+        <span class="nav-icon">M</span>
         Marketing
         <span class="nav-active-dot"></span>
       </button>
       <button class="nav-item" id="nav-finance" onclick="showAgent('finance')">
-        <span class="nav-icon">📊</span>
+        <span class="nav-icon">F</span>
         Finance
         <span class="nav-active-dot"></span>
       </button>
       <button class="nav-item" id="nav-strategy" onclick="showAgent('strategy')">
-        <span class="nav-icon">🎯</span>
+        <span class="nav-icon">P</span>
         Big Picture
         <span class="nav-active-dot"></span>
       </button>
 
-      <div style="margin-top:auto;padding:16px;border-top:1px solid #1F1F1F">
-        <div style="font-size:9px;color:#333;letter-spacing:0.5px;line-height:1.6">
-          ROGUE LAB<br>
-          ROGUE TRANSFERS<br>
-          ROGUE ACADEMY
-        </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-mark">Rogue Lab</div>
+        <div class="sidebar-footer-list">Rogue Transfers · Rogue Academy</div>
+        <div class="sidebar-footer-loc">Winnipeg, MB · Canada</div>
       </div>
     </div>
 
@@ -930,7 +1059,7 @@ let brain = { ...DEFAULT_BRAIN };
 const AGENT_CONFIG = {
   sales: {
     name: 'Sales Agent',
-    icon: '💰',
+    icon: 'S',
     desc: 'Quotes, follow-up, pipeline, closing',
     capabilities: ['Quote follow-up', 'Cold outreach', 'Objection handling', 'Upsell angles', 'Pipeline thinking'],
     starters: [
@@ -944,7 +1073,7 @@ const AGENT_CONFIG = {
   },
   ops: {
     name: 'Operations Agent',
-    icon: '⚙️',
+    icon: 'O',
     desc: 'SOPs, production flow, lean systems',
     capabilities: ['SOP writing', 'Production mapping', 'KPI setup', 'QC checklists', 'Lean/Kaizen'],
     starters: [
@@ -958,7 +1087,7 @@ const AGENT_CONFIG = {
   },
   marketing: {
     name: 'Marketing Agent',
-    icon: '📣',
+    icon: 'M',
     desc: 'Content, campaigns, brand voice',
     capabilities: ['Instagram captions', 'YouTube scripts', 'Email campaigns', 'Content planning', 'Brand voice'],
     starters: [
@@ -972,7 +1101,7 @@ const AGENT_CONFIG = {
   },
   finance: {
     name: 'Finance Agent',
-    icon: '📊',
+    icon: 'F',
     desc: 'Pricing, margins, revenue modeling',
     capabilities: ['Job costing', 'Margin analysis', 'Pricing strategy', 'Revenue modeling', 'Unit economics'],
     starters: [
@@ -986,7 +1115,7 @@ const AGENT_CONFIG = {
   },
   strategy: {
     name: 'Big Picture Agent',
-    icon: '🎯',
+    icon: 'P',
     desc: 'Vision, decisions, 8-figure roadmap',
     capabilities: ['Strategic priorities', 'Growth levers', 'Build vs buy decisions', 'Roadmap thinking', 'Hard questions'],
     starters: [
