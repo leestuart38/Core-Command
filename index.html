@@ -677,32 +677,58 @@ textarea, input { font-family: inherit; }
 }
 .starter-btn:hover { border-color: #CC0000; color: #CC0000; }
 
-.chat-input-row {
+.chat-composer-wrap {
   padding: 12px 24px 16px;
   border-top: 1px solid #1F1F1F;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
   flex-shrink: 0;
 }
-.chat-textarea {
-  flex: 1;
+.chat-composer {
   background: #161616;
   border: 1px solid #2A2A2A;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s;
+}
+.chat-composer:focus-within { border-color: #444; }
+.chat-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
   color: #F0F0F0;
-  padding: 10px 14px;
+  padding: 12px 14px 8px;
   font-size: 13px;
   resize: none;
-  min-height: 40px;
+  min-height: 44px;
   max-height: 120px;
   outline: none;
   line-height: 1.5;
-  transition: border-color 0.15s;
 }
-.chat-textarea:focus { border-color: #CC0000; }
+.chat-composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 8px 10px;
+  gap: 10px;
+}
+.model-select {
+  background-color: #0D0D0D;
+  border: 1px solid #2A2A2A;
+  color: #888;
+  padding: 5px 28px 5px 10px;
+  font-size: 11px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.model-select:focus { border-color: #444; color: #AAA; }
 .send-btn {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: #CC0000;
   border: none;
   color: white;
@@ -884,6 +910,7 @@ let GIST_ID = '';
 let currentView = 'dashboard';
 let currentAgent = 'sales';
 let isLoading = false;
+let currentModel = 'claude-sonnet-4-6';
 
 const DEFAULT_BRAIN = {
   businesses: `Rogue Lab: screen printing & embroidery shop, Winnipeg, Canada. High-end production with ROQ auto presses, Tajima embroidery machines. B2B and direct retail.\n\nRogue Transfers: B2B/B2C DTF transfers, stickers, patches. Mimaki TXF300-75 DTF printers. Ships across Canada.\n\nRogue Academy: Kajabi-based coaching and education platform for the decorated apparel industry.`,
@@ -1332,7 +1359,7 @@ function renderAgent(agentKey) {
   const a = AGENT_CONFIG[agentKey];
   const showStarters = a.history.length <= 1;
 
-  return `<div class="agent-view">
+  const html = `<div class="agent-view">
     <div class="agent-view-header">
       <button class="back-btn" onclick="showView('dashboard')" aria-label="Back">←</button>
       <div class="agent-view-icon">${a.icon}</div>
@@ -1350,14 +1377,30 @@ function renderAgent(agentKey) {
       ${a.starters.map(s => `<button class="starter-btn" onclick="sendMsg(${JSON.stringify(s)})">${s}</button>`).join('')}
     </div>` : ''}
 
-    <div class="chat-input-row">
-      <textarea class="chat-textarea" id="chat-input" placeholder="Message ${a.name}..." rows="1"
-        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-      <button class="send-btn" onclick="sendFromInput()" aria-label="Send">
-        <svg viewBox="0 0 16 16"><path d="M14.5 8L2 2l2 6-2 6 12.5-6z"/></svg>
-      </button>
+    <div class="chat-composer-wrap">
+      <div class="chat-composer">
+        <textarea class="chat-textarea" id="chat-input" placeholder="Message ${a.name}..." rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="chat-composer-footer">
+          <select id="model-selector" class="model-select" onchange="setModel(this.value)">
+            <option value="claude-haiku-4-5-20251001">Haiku — Fast</option>
+            <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — Balanced</option>
+            <option value="claude-opus-4-6">Opus 4.6 — Deep</option>
+          </select>
+          <button class="send-btn" onclick="sendFromInput()" aria-label="Send">
+            <svg viewBox="0 0 16 16"><path d="M14.5 8L2 2l2 6-2 6 12.5-6z"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>`;
+
+  setTimeout(() => {
+    const sel = document.getElementById('model-selector');
+    if (sel) sel.value = currentModel;
+  }, 0);
+
+  return html;
 }
 
 function renderMsg(m) {
@@ -1454,7 +1497,7 @@ async function sendMsg(text) {
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: currentModel,
         max_tokens: 1024,
         system: buildSystemPrompt(currentAgent),
         messages
@@ -1472,6 +1515,16 @@ async function sendMsg(text) {
   isLoading = false;
   chatArea.innerHTML = a.history.map(renderMsg).join('');
   chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function setModel(val) {
+  currentModel = val;
+  const labels = {
+    'claude-haiku-4-5-20251001': 'Haiku',
+    'claude-sonnet-4-6': 'Sonnet 4.6',
+    'claude-opus-4-6': 'Opus 4.6'
+  };
+  toast('Switched to ' + labels[val]);
 }
 
 // ── TOAST ── //
