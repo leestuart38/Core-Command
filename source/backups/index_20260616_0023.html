@@ -677,58 +677,32 @@ textarea, input { font-family: inherit; }
 }
 .starter-btn:hover { border-color: #CC0000; color: #CC0000; }
 
-.chat-composer-wrap {
+.chat-input-row {
   padding: 12px 24px 16px;
   border-top: 1px solid #1F1F1F;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
   flex-shrink: 0;
 }
-.chat-composer {
+.chat-textarea {
+  flex: 1;
   background: #161616;
   border: 1px solid #2A2A2A;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.15s;
-}
-.chat-composer:focus-within { border-color: #444; }
-.chat-textarea {
-  width: 100%;
-  background: transparent;
-  border: none;
   color: #F0F0F0;
-  padding: 12px 14px 8px;
+  padding: 10px 14px;
   font-size: 13px;
   resize: none;
-  min-height: 44px;
+  min-height: 40px;
   max-height: 120px;
   outline: none;
   line-height: 1.5;
+  transition: border-color 0.15s;
 }
-.chat-composer-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px 8px 10px;
-  gap: 10px;
-}
-.model-select {
-  background: #0D0D0D;
-  border: 1px solid #2A2A2A;
-  color: #888;
-  padding: 5px 28px 5px 10px;
-  font-size: 11px;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-}
-.model-select:focus { border-color: #444; color: #AAA; }
+.chat-textarea:focus { border-color: #CC0000; }
 .send-btn {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   background: #CC0000;
   border: none;
   color: white;
@@ -1367,6 +1341,14 @@ function renderAgent(agentKey) {
         <div class="agent-view-name">${a.name}</div>
         <div class="agent-view-desc">${a.desc}</div>
       </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span style="font-size:9px;letter-spacing:0.8px;text-transform:uppercase;color:#444">Model</span>
+        <select id="model-selector" onchange="setModel(this.value)" style="background:#161616;border:1px solid #2A2A2A;color:#888;padding:5px 10px;font-size:11px;font-family:inherit;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;">
+          <option value="claude-haiku-4-5-20251001">Haiku — Fast</option>
+          <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — Balanced</option>
+          <option value="claude-opus-4-6">Opus 4.6 — Deep</option>
+        </select>
+      </div>
     </div>
 
     <div class="chat-area" id="chat-area">
@@ -1377,21 +1359,12 @@ function renderAgent(agentKey) {
       ${a.starters.map(s => `<button class="starter-btn" onclick="sendMsg(${JSON.stringify(s)})">${s}</button>`).join('')}
     </div>` : ''}
 
-    <div class="chat-composer-wrap">
-      <div class="chat-composer">
-        <textarea class="chat-textarea" id="chat-input" placeholder="Message ${a.name}..." rows="1"
-          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-        <div class="chat-composer-footer">
-          <select id="model-selector" class="model-select" onchange="setModel(this.value)">
-            <option value="claude-haiku-4-5-20251001">Haiku — Fast</option>
-            <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — Balanced</option>
-            <option value="claude-opus-4-6">Opus 4.6 — Deep</option>
-          </select>
-          <button class="send-btn" onclick="sendFromInput()" aria-label="Send">
-            <svg viewBox="0 0 16 16"><path d="M14.5 8L2 2l2 6-2 6 12.5-6z"/></svg>
-          </button>
-        </div>
-      </div>
+    <div class="chat-input-row">
+      <textarea class="chat-textarea" id="chat-input" placeholder="Message ${a.name}..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendFromInput()" aria-label="Send">
+        <svg viewBox="0 0 16 16"><path d="M14.5 8L2 2l2 6-2 6 12.5-6z"/></svg>
+      </button>
     </div>
   </div>`;
 
